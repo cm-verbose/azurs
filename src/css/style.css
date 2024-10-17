@@ -1,0 +1,41 @@
+@font-face {
+  font-family: Inter;
+  font-display: swap;
+  src: url(../fonts/Inter/Inter.ttf);
+}
+
+@font-face {
+  font-family: Inter;
+  font-display: swap;
+  font-style: italic;
+  src: url(../fonts/Inter/Inter_Italic.ttf);
+}
+
+:root {
+  --text-color-primary: #000;
+  --text-color-placeholder: #888;
+}
+
+body {
+  font-size: 20px;
+  font-family: Inter, Arial, Helvetica, sans-serif;
+  margin: 0px;
+}
+
+#editor {
+  position: absolute;
+  left: 50%; 
+  transform: translate(-50%);
+  width: 50%;
+  margin: 3em;
+  font-family: Inter, Arial, Helvetica, sans-serif;
+  outline: none;
+  line-height: 1.25em;
+}
+
+#editor > #initial-paragraph:empty::before {
+  content: "Start writing";
+  pointer-events: none;
+  user-select: none;
+  color: var(--text-color-placeholder);
+}
