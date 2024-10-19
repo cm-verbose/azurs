@@ -4,6 +4,7 @@
  * */
 
 declare interface InputTypesInterface {
+  DELETE_CONTENT: "deleteContent"; 
   DELETE_CONTENT_FOWARDS: "deleteContentForward";
   DELETE_CONTENT_BACKWARDS: "deleteContentBackward";
   PARAGRAPH_INSERTION: "insertParagraph";

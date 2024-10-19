@@ -24,7 +24,7 @@ body {
 
 #editor {
   position: absolute;
-  left: 50%; 
+  left: 50%;
   transform: translate(-50%);
   width: 50%;
   margin: 3em;
@@ -38,4 +38,9 @@ body {
   pointer-events: none;
   user-select: none;
   color: var(--text-color-placeholder);
+}
+
+/* Paragraphs must have some height to be focused on, or else it's impossible to focus on them */
+#editor > p {
+  min-height: 1em;
 }

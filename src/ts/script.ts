@@ -1,4 +1,4 @@
-import Editor from "./mod/editor.js";
+import Editor from "./mod/editor";
 
 class Main {
   constructor() {
