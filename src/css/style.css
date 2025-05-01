@@ -12,13 +12,15 @@
 }
 
 :root {
-  --text-color-primary: #000;
-  --text-color-placeholder: #888;
+  --primary-background-color: #101015;
+  --text-color-primary: #888888;
+  --text-color-placeholder: #666;
 }
 
 body {
   font-size: 20px;
   font-family: Inter, Arial, Helvetica, sans-serif;
+  background-color: var(--primary-background-color);
   margin: 0px;
 }
 
@@ -31,6 +33,7 @@ body {
   font-family: Inter, Arial, Helvetica, sans-serif;
   outline: none;
   line-height: 1.25em;
+  color: var(--text-color-primary);
 }
 
 #editor > #initial-paragraph:empty::before {
@@ -38,6 +41,10 @@ body {
   pointer-events: none;
   user-select: none;
   color: var(--text-color-placeholder);
+}
+
+#editor > #initial-paragraph[data-empty]:empty::before {
+  content: "";
 }
 
 /* Paragraphs must have some height to be focused on, or else it's impossible to focus on them */

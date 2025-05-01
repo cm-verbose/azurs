@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "test": "npx cypress open",
-    "w": "tsc --watch"
+    "w": "npx webpack -w"
   },
   "keywords": [],
   "author": "",

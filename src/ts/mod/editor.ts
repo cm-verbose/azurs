@@ -5,123 +5,134 @@ export default class Editor {
   initialParagraph = document.querySelector("#initial-paragraph") as HTMLParagraphElement;
 
   constructor() {
-    this.ini();
-  }
-
-  private ini() {
     this.handleEditorInput();
   }
 
-  /** @description Handles inputing / typing in the editor */
+  /** Handles inputs */
   private handleEditorInput() {
-    this.editor.addEventListener("beforeinput", (e: InputEvent) => {
-      switch (e.inputType as InputTypes) {
-        case "insertParagraph":
-          {
-            e.preventDefault();
-            this.handleParagraphInsertion();
-          }
+    this.editor.addEventListener("beforeinput", (event: InputEvent) => {
+      console.log(event.inputType);
+      switch (event.inputType as InputTypes) {
+        case "deleteContentBackward":
+          this.handleBackwardsDeletion(event);
           break;
 
-        case "deleteContentBackward":
-          {
-            this.handleDeletion(e);
-          }
+        case "insertParagraph":
+          this.handleParagraphInsertion(event);
           break;
       }
     });
   }
 
-  /** @description Normalises paragraph insertions using the Selection and Range APIs */
-  private handleParagraphInsertion() {
+  /** Handles deletion of characters with the <backspace> key, also preserves the initial paragraph */
+  private handleBackwardsDeletion(event: InputEvent) {
+    const targetRanges: Array<StaticRange> = event.getTargetRanges();
+
+    if (targetRanges.length === 1) {
+      this.handleSingleRangeBackwardsDeletion(event, targetRanges[0]);
+    } else {
+      // Handle multiple StatocRange objects ?
+      for (const range of targetRanges) {
+        console.info("[Backwards deletion]:", range);
+      }
+    }
+  }
+
+  /** Handle deletion when a single StaticRange is available */
+  private handleSingleRangeBackwardsDeletion(event: InputEvent, targetRange: StaticRange) {
+    const startP = this.getEditorLevelParent(targetRange.startContainer);
+    const endP = this.getEditorLevelParent(targetRange.endContainer);
+
+    const isInitialParagraph = this.getEditorLevelParent(startP).isSameNode(this.initialParagraph);
+    const sO = targetRange.startOffset;
+
+    if (startP.isEqualNode(endP)) {
+      const eO = targetRange.endOffset;
+      const rangeLength = eO - sO;
+      const initialText = this.initialParagraph.innerText;
+
+      if (isInitialParagraph && initialText.length === rangeLength) {
+        event.preventDefault();
+        this.initialParagraph.innerHTML = "";
+        this.initialParagraph.removeAttribute("data-empty");
+      }
+    } else {
+      if (isInitialParagraph && sO === 0) {
+        setTimeout(() => {
+          this.initialParagraph.innerHTML = "";
+          if (this.editor.childElementCount !== 1) {
+            this.initialParagraph.setAttribute("data-empty", "");
+          } else {
+            this.initialParagraph.removeAttribute("data-empty");
+          }
+        });
+      }
+    }
+  }
+
+  /** Handles inserting paragraphs into the editor */
+  private handleParagraphInsertion(event: InputEvent) {
+    const targetRanges: Array<StaticRange> = event.getTargetRanges();
+
+    if (targetRanges.length === 1) {
+      this.handleSingleRangeParagraphInsertion(event, targetRanges[0]);
+    } else {
+      // Handle multiple StatocRange objects ?
+      for (const range of targetRanges) {
+        console.info("[Paragraph Insertion]", range);
+      }
+    }
+  }
+
+  /** Handles inserting a paragraph when a single StaticRange is available */
+  private handleSingleRangeParagraphInsertion(event: InputEvent, targetRange: StaticRange) {
+    event.preventDefault();
+
     const selection = window.getSelection();
     if (!selection) return;
 
-    const selectionRange = selection.getRangeAt(0);
-    if (!selectionRange) return;
-    selectionRange.deleteContents();
+    // Copying range, deleting content
+    const range = new Range();
+    range.setStart(targetRange.startContainer, targetRange.startOffset);
+    range.setEnd(targetRange.endContainer, targetRange.endOffset);
+    range.deleteContents();
 
-    const selectionAnchor = selection.anchorNode;
-    const selectionFocus = selection.focusNode;
-    if (selectionAnchor === null || selectionFocus === null) return;
+    // Paragraph creation
+    const newP = document.createElement("p");
+    const startP = this.getEditorLevelParent(targetRange.startContainer);
+    const newPRange = new Range();
 
-    const selectionAnchorParagraph = this.getParentAtEditorLevel(selectionAnchor);
-    const lastChild = selectionAnchorParagraph.lastChild;
-
-    const newParagraph = document.createElement("p");
-
-    if (lastChild === null) {
+    if (startP.lastChild === null) {
       const newline = document.createElement("br");
-      newParagraph.appendChild(newline);
-      selectionAnchorParagraph.insertAdjacentElement("afterend", newParagraph);
-
-      const positionNewParagraphRange = new Range();
-      positionNewParagraphRange.setStartBefore(newParagraph);
-      positionNewParagraphRange.setEndBefore(newParagraph);
-
-      selection.removeAllRanges();
-      selection.addRange(positionNewParagraphRange);
+      newP.appendChild(newline);
     } else {
-      // Here we select the remaining elements after the cursor to be moved in the next
-      // line. Using lastChild allows us to set the end of the selection.
-      const moveRange = new Range();
-      moveRange.setStart(selectionRange.startContainer, selectionRange.startOffset);
-      moveRange.setEndAfter(lastChild);
-      const nodes = moveRange.extractContents();
+      newPRange.setStart(targetRange.startContainer, targetRange.startOffset);
+      newPRange.setEndAfter(startP.lastChild);
 
-      // An element with no text cannot be focused on, so we use a <br>
+      const nodes: DocumentFragment = newPRange.extractContents();
       if (nodes.textContent === null || nodes.textContent.length === 0) {
         const newline = document.createElement("br");
-        newParagraph.appendChild(newline);
+        newP.appendChild(newline);
       } else {
-        nodes.childNodes.forEach(child => {
-          newParagraph.append(child); 
-        });
-      }
-      selectionAnchorParagraph.insertAdjacentElement("afterend", newParagraph);
-
-      moveRange.setStartBefore(newParagraph);
-      moveRange.setEndBefore(newParagraph);
-
-      selection.removeAllRanges();
-      selection.addRange(moveRange);
-    }
-    // Setting the position is necessary as trying to add more empty paragraphs
-    // results in the editor being the anchor.
-    selection.setPosition(newParagraph);
-  }
-
-  /** @description Handles deletion */
-  private handleDeletion(inputEvent: InputEvent) {
-    const selection = window.getSelection();
-    if (!selection) return;
-
-    const anchorNode = selection.anchorNode;
-    if (!anchorNode) return;
-    const selectionAnchorParagraph = this.getParentAtEditorLevel(anchorNode);
-
-    // Prevent the initial paragraph from being deleted
-    if (selectionAnchorParagraph.isSameNode(this.initialParagraph)) {
-      const childNodes = this.initialParagraph.childNodes;
-      if (childNodes.length === 1 && this.initialParagraph.firstChild?.textContent?.length === 0) {
-        inputEvent.preventDefault();
-        this.initialParagraph.firstChild.remove();
-      } else if (this.initialParagraph.textContent?.length === 0) {
-        inputEvent.preventDefault();
-      }
-
-      // Remove automatically inserted <br> element
-      if (childNodes.length === 1 && this.initialParagraph.textContent?.length === 1) {
-        setTimeout(() => {
-          if (!(childNodes.length === 1 && childNodes[0].nodeName === "BR")) return;
-          childNodes[0].remove();
+        nodes.childNodes.forEach((child) => {
+          newP.appendChild(child);
         });
       }
     }
+
+    startP.insertAdjacentElement("afterend", newP);
+    newPRange.setStartBefore(newP);
+    newPRange.setEndAfter(newP);
+
+    selection.removeAllRanges();
+    selection.addRange(newPRange);
+
+    if (this.editor.childElementCount > 1) {
+      this.initialParagraph.setAttribute("data-empty", "");
+    }
   }
 
-  /** @description Fetches a child paragraph from the editor based on a node within the editor */
-  private getParentAtEditorLevel(node: NonNullable<Node>): HTMLParagraphElement {
+  private getEditorLevelParent(node: NonNullable<Node>): HTMLParagraphElement {
     let parentNode: Node = node;
     while (parentNode.parentNode !== null && !parentNode.parentNode.isEqualNode(this.editor)) {
       parentNode = parentNode.parentNode;
