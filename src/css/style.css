@@ -50,4 +50,5 @@ body {
 /* Paragraphs must have some height to be focused on, or else it's impossible to focus on them */
 #editor > p {
   min-height: 1em;
+  line-height: 1.5;
 }

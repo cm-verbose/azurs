@@ -122,7 +122,7 @@ export default class Editor {
 
     startP.insertAdjacentElement("afterend", newP);
     newPRange.setStartBefore(newP);
-    newPRange.setEndAfter(newP);
+    newPRange.setEndBefore(newP);
 
     selection.removeAllRanges();
     selection.addRange(newPRange);
