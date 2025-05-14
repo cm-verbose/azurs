@@ -3,7 +3,7 @@ import webpack from "webpack";
 
 const config: webpack.Configuration = {
   entry: "./src/ts/script.ts",
-  mode: "development",
+  mode: "none",
   module: {
     rules: [
       {

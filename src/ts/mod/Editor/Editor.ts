@@ -1,4 +1,4 @@
-import { InputTypes } from "../types";
+import { InputTypes } from "../../types";
 
 export default class Editor {
   editor = document.querySelector("#editor") as HTMLDivElement;
@@ -11,15 +11,14 @@ export default class Editor {
   /** Handles inputs */
   private handleEditorInput() {
     this.editor.addEventListener("beforeinput", (event: InputEvent) => {
-      console.log(event.inputType);
       switch (event.inputType as InputTypes) {
-        case "deleteContentBackward":
+        case "deleteContentBackward": {
           this.handleBackwardsDeletion(event);
-          break;
+        } break;
 
-        case "insertParagraph":
+        case "insertParagraph": {
           this.handleParagraphInsertion(event);
-          break;
+        } break;
       }
     });
   }
@@ -31,7 +30,7 @@ export default class Editor {
     if (targetRanges.length === 1) {
       this.handleSingleRangeBackwardsDeletion(event, targetRanges[0]);
     } else {
-      // Handle multiple StatocRange objects ?
+      // Handle multiple StaticRange objects ?
       for (const range of targetRanges) {
         console.info("[Backwards deletion]:", range);
       }
@@ -77,7 +76,7 @@ export default class Editor {
     if (targetRanges.length === 1) {
       this.handleSingleRangeParagraphInsertion(event, targetRanges[0]);
     } else {
-      // Handle multiple StatocRange objects ?
+      // Handle multiple StaticRange objects ?
       for (const range of targetRanges) {
         console.info("[Paragraph Insertion]", range);
       }
@@ -90,23 +89,24 @@ export default class Editor {
 
     const selection = window.getSelection();
     if (!selection) return;
+    const startContainer = targetRange.startContainer;
 
     // Copying range, deleting content
     const range = new Range();
-    range.setStart(targetRange.startContainer, targetRange.startOffset);
+    range.setStart(startContainer, targetRange.startOffset);
     range.setEnd(targetRange.endContainer, targetRange.endOffset);
     range.deleteContents();
 
     // Paragraph creation
     const newP = document.createElement("p");
-    const startP = this.getEditorLevelParent(targetRange.startContainer);
+    const startP = this.getEditorLevelParent(startContainer);
     const newPRange = new Range();
 
     if (startP.lastChild === null) {
       const newline = document.createElement("br");
       newP.appendChild(newline);
     } else {
-      newPRange.setStart(targetRange.startContainer, targetRange.startOffset);
+      newPRange.setStart(startContainer, targetRange.startOffset);
       newPRange.setEndAfter(startP.lastChild);
 
       const nodes: DocumentFragment = newPRange.extractContents();
@@ -119,7 +119,6 @@ export default class Editor {
         });
       }
     }
-
     startP.insertAdjacentElement("afterend", newP);
     newPRange.setStartBefore(newP);
     newPRange.setEndBefore(newP);
@@ -127,16 +126,20 @@ export default class Editor {
     selection.removeAllRanges();
     selection.addRange(newPRange);
 
+    newP.scrollIntoView({
+      behavior: "instant",
+      block: "center",
+    });
     if (this.editor.childElementCount > 1) {
       this.initialParagraph.setAttribute("data-empty", "");
     }
   }
 
   private getEditorLevelParent(node: NonNullable<Node>): HTMLParagraphElement {
-    let parentNode: Node = node;
-    while (parentNode.parentNode !== null && !parentNode.parentNode.isEqualNode(this.editor)) {
-      parentNode = parentNode.parentNode;
+    let parent: Node = node;
+    while (parent.parentNode !== null && !parent.parentNode.isEqualNode(this.editor)) {
+      parent = parent.parentNode;
     }
-    return parentNode as HTMLParagraphElement;
+    return parent as HTMLParagraphElement;
   }
 }
