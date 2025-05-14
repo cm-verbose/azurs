@@ -6,7 +6,7 @@ class Main {
   }
 
   private ini() {
-    new Editor(); 
+    new Editor();
   }
 }
 

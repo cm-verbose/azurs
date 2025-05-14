@@ -12,13 +12,17 @@ export default class Editor {
   private handleEditorInput() {
     this.editor.addEventListener("beforeinput", (event: InputEvent) => {
       switch (event.inputType as InputTypes) {
-        case "deleteContentBackward": {
-          this.handleBackwardsDeletion(event);
-        } break;
+        case "deleteContentBackward":
+          {
+            this.handleBackwardsDeletion(event);
+          }
+          break;
 
-        case "insertParagraph": {
-          this.handleParagraphInsertion(event);
-        } break;
+        case "insertParagraph":
+          {
+            this.handleParagraphInsertion(event);
+          }
+          break;
       }
     });
   }
