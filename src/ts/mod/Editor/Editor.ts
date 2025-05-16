@@ -5,11 +5,12 @@ export default class Editor {
   initialParagraph = document.querySelector("#initial-paragraph") as HTMLParagraphElement;
 
   constructor() {
-    this.handleEditorInput();
+    this.handleEditorEvents();
   }
 
-  /** Handles inputs */
-  private handleEditorInput() {
+  /** Handles inputs and events */
+  private handleEditorEvents() {
+    this.handleInitialParagraphPlaceholder();
     this.editor.addEventListener("beforeinput", (event: InputEvent) => {
       switch (event.inputType as InputTypes) {
         case "deleteContentBackward":
@@ -25,6 +26,29 @@ export default class Editor {
           break;
       }
     });
+  }
+
+  /** Handling the placeholder of the initial paragraph */
+  private handleInitialParagraphPlaceholder() {
+    const observer = new MutationObserver((mutations) => {
+      for (const mutation of mutations) {
+        if (mutation.type !== "characterData" && mutation.type !== "childList") {
+          return;
+        }
+        if (this.editor.innerText?.length !== 0) {
+          this.initialParagraph.setAttribute("data-empty", "");
+        } else {
+          this.initialParagraph.removeAttribute("data-empty");
+        }
+      }
+    });
+    const options: MutationObserverInit = {
+      subtree: true,
+      childList: true,
+      characterData: true,
+      characterDataOldValue: true
+    };
+    observer.observe(this.editor, options);
   }
 
   /** Handles deletion of characters with the <backspace> key, also preserves the initial paragraph */
@@ -57,17 +81,11 @@ export default class Editor {
       if (isInitialParagraph && initialText.length === rangeLength) {
         event.preventDefault();
         this.initialParagraph.innerHTML = "";
-        this.initialParagraph.removeAttribute("data-empty");
       }
     } else {
       if (isInitialParagraph && sO === 0) {
         setTimeout(() => {
           this.initialParagraph.innerHTML = "";
-          if (this.editor.childElementCount !== 1) {
-            this.initialParagraph.setAttribute("data-empty", "");
-          } else {
-            this.initialParagraph.removeAttribute("data-empty");
-          }
         });
       }
     }
@@ -133,10 +151,8 @@ export default class Editor {
     newP.scrollIntoView({
       behavior: "instant",
       block: "center",
+      inline: "center"
     });
-    if (this.editor.childElementCount > 1) {
-      this.initialParagraph.setAttribute("data-empty", "");
-    }
   }
 
   private getEditorLevelParent(node: NonNullable<Node>): HTMLParagraphElement {
