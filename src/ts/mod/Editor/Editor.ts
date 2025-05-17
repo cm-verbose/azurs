@@ -1,8 +1,9 @@
 import { InputTypes } from "../../types";
 
+/** Implements insertion functions inside the editor */
 export default class Editor {
-  editor = document.querySelector("#editor") as HTMLDivElement;
-  initialParagraph = document.querySelector("#initial-paragraph") as HTMLParagraphElement;
+  private editor = document.querySelector("#editor") as HTMLDivElement;
+  private initialParagraph = document.querySelector("#initial-paragraph") as HTMLParagraphElement;
 
   constructor() {
     this.handleEditorEvents();
@@ -60,7 +61,7 @@ export default class Editor {
     } else {
       // Handle multiple StaticRange objects ?
       for (const range of targetRanges) {
-        console.info("[Backwards deletion]:", range);
+        // [Backwards deletion]
       }
     }
   }
@@ -100,7 +101,7 @@ export default class Editor {
     } else {
       // Handle multiple StaticRange objects ?
       for (const range of targetRanges) {
-        console.info("[Paragraph Insertion]", range);
+        // [Paragraph insertion]
       }
     }
   }
@@ -113,11 +114,10 @@ export default class Editor {
     if (!selection) return;
     const startContainer = targetRange.startContainer;
 
-    // Copying range, deleting content
-    const range = new Range();
-    range.setStart(startContainer, targetRange.startOffset);
-    range.setEnd(targetRange.endContainer, targetRange.endOffset);
-    range.deleteContents();
+    const copyRange = new Range();
+    copyRange.setStart(startContainer, targetRange.startOffset);
+    copyRange.setEnd(targetRange.endContainer, targetRange.endOffset);
+    copyRange.deleteContents();
 
     // Paragraph creation
     const newP = document.createElement("p");
@@ -136,9 +136,9 @@ export default class Editor {
         const newline = document.createElement("br");
         newP.appendChild(newline);
       } else {
-        nodes.childNodes.forEach((child) => {
-          newP.appendChild(child);
-        });
+        for (const child of nodes.childNodes) {
+          newP.append(child);
+        }
       }
     }
     startP.insertAdjacentElement("afterend", newP);
@@ -155,6 +155,7 @@ export default class Editor {
     });
   }
 
+  /** Finds the immediate descendant of the editor where the node is found */
   private getEditorLevelParent(node: NonNullable<Node>): HTMLParagraphElement {
     let parent: Node = node;
     while (parent.parentNode !== null && !parent.parentNode.isEqualNode(this.editor)) {

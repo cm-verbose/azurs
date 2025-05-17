@@ -15,6 +15,11 @@
   --primary-background-color: #101015;
   --text-color-primary: #888888;
   --text-color-placeholder: #666;
+  --text-selected-background-color: #D8E4FF25;
+}
+
+*::selection {
+  background-color: var(--text-selected-background-color);
 }
 
 body {
@@ -46,6 +51,7 @@ body {
 
 #editor > #initial-paragraph:empty::before {
   content: "Start writing";
+  font-weight: 300;
   pointer-events: none;
   user-select: none;
   color: var(--text-color-placeholder);
