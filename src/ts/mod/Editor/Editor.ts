@@ -47,7 +47,7 @@ export default class Editor {
       subtree: true,
       childList: true,
       characterData: true,
-      characterDataOldValue: true
+      characterDataOldValue: true,
     };
     observer.observe(this.editor, options);
   }
@@ -151,7 +151,7 @@ export default class Editor {
     newP.scrollIntoView({
       behavior: "instant",
       block: "center",
-      inline: "center"
+      inline: "center",
     });
   }
 

@@ -15,7 +15,7 @@
   --primary-background-color: #101015;
   --text-color-primary: #888888;
   --text-color-placeholder: #666;
-  --text-selected-background-color: #D8E4FF25;
+  --text-selected-background-color: #d8e4ff25;
 }
 
 *::selection {
