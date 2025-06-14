@@ -56,18 +56,13 @@ export default class Editor {
   private handleBackwardsDeletion(event: InputEvent) {
     const targetRanges: Array<StaticRange> = event.getTargetRanges();
 
-    if (targetRanges.length === 1) {
-      this.handleSingleRangeBackwardsDeletion(event, targetRanges[0]);
-    } else {
-      // Handle multiple StaticRange objects ?
-      for (const range of targetRanges) {
-        // [Backwards deletion]
-      }
+    for (const range of targetRanges) {
+      this.deleteContentBackwards(event, range);
     }
   }
 
   /** Handle deletion when a single StaticRange is available */
-  private handleSingleRangeBackwardsDeletion(event: InputEvent, targetRange: StaticRange) {
+  private deleteContentBackwards(event: InputEvent, targetRange: StaticRange) {
     const startP = this.getEditorLevelParent(targetRange.startContainer);
     const endP = this.getEditorLevelParent(targetRange.endContainer);
 
@@ -96,18 +91,13 @@ export default class Editor {
   private handleParagraphInsertion(event: InputEvent) {
     const targetRanges: Array<StaticRange> = event.getTargetRanges();
 
-    if (targetRanges.length === 1) {
-      this.handleSingleRangeParagraphInsertion(event, targetRanges[0]);
-    } else {
-      // Handle multiple StaticRange objects ?
-      for (const range of targetRanges) {
-        // [Paragraph insertion]
-      }
+    for (const ranges of targetRanges) {
+      this.insertParagraph(event, ranges);
     }
   }
 
   /** Handles inserting a paragraph when a single StaticRange is available */
-  private handleSingleRangeParagraphInsertion(event: InputEvent, targetRange: StaticRange) {
+  private insertParagraph(event: InputEvent, targetRange: StaticRange) {
     event.preventDefault();
 
     const selection = window.getSelection();
